@@ -13,15 +13,44 @@ public class Mymodel : MonoBehaviour
     private bool[,] mapxy;
     private bool[,] mapyz;
     private bool[,] mapzx;
-
     private bool[,,] map;
+
+    private float Speed;
+    private float RollSpeed;
+    private bool rotateEnable;
+    private Vector3 mousePos;
 
     private void Start()
     {
-        //TextureScale.Bilinear(TextureXY, SIZE, SIZE);
-        //TextureScale.Bilinear(TextureYZ, SIZE, SIZE);
-        //TextureScale.Bilinear(TextureZX, SIZE, SIZE);
+        Init();
+        rotateEnable = false;
+        Speed = 1000;
+        RollSpeed = 0.2f;
+    }
 
+    private void Update()
+    {
+        Camera.main.transform.Translate(Vector3.forward * Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * Speed, Space.World);
+        if (Input.GetMouseButtonDown(0))
+        {
+            rotateEnable = true;
+            mousePos = Input.mousePosition;
+        }
+        if (Input.GetMouseButtonUp(0))
+        {
+            rotateEnable = false;
+        }
+        if (rotateEnable)
+        {
+            Vector3 newPos = Input.mousePosition;
+            transform.RotateAround(new Vector3((SIZE - 1) / 2.0f, (SIZE - 1) / 2.0f, (SIZE - 1) / 2.0f), Vector3.right, (newPos.y - mousePos.y) * RollSpeed);
+            transform.RotateAround(new Vector3((SIZE - 1) / 2.0f, (SIZE - 1) / 2.0f, (SIZE - 1) / 2.0f), Vector3.up, (-newPos.x + mousePos.x) * RollSpeed);
+            mousePos = newPos;
+        }
+    }
+
+    private void Init()
+    {
         mapxy = new bool[SIZE, SIZE];
         mapyz = new bool[SIZE, SIZE];
         mapzx = new bool[SIZE, SIZE];
@@ -40,6 +69,7 @@ public class Mymodel : MonoBehaviour
             }
         }
 
+        int count = 0;
         for (int x = 0; x < SIZE; x++)
         {
             for (int y = 0; y < SIZE; y++)
@@ -49,9 +79,18 @@ public class Mymodel : MonoBehaviour
                     map[x, y, z] = mapxy[y, x] && mapyz[y, z] && mapzx[SIZE - x - 1, z];
                     if (map[x, y, z])
                     {
-                        GameObject cube = Instantiate(Resources.Load("Cube", typeof(GameObject))) as GameObject;
-                        cube.transform.parent = transform;
-                        cube.transform.position = new Vector3(x, y, z);
+                        bool create = true;
+                        if (x > 0 && x < SIZE - 1 && y > 0 && y < SIZE - 1 && z > 0 && z < SIZE - 1)
+                        {
+                            create = !(map[x - 1, y, z] && map[x + 1, y, z] && map[x, y - 1, z] && map[x, y + 1, z] && map[x, y, z - 1] && map[x, y, z + 1]);
+                        }
+                        if (create)
+                        {
+                            GameObject cube = Instantiate(Resources.Load("Cube", typeof(GameObject))) as GameObject;
+                            cube.transform.parent = transform;
+                            cube.transform.position = new Vector3(x, y, z);
+                            count++;
+                        }
                     }
                 }
             }
@@ -69,9 +108,13 @@ public class Mymodel : MonoBehaviour
                     }
                     if (!c0)
                     {
-                        GameObject cube = Instantiate(Resources.Load("Cubexy", typeof(GameObject))) as GameObject;
-                        cube.transform.parent = transform;
-                        cube.transform.position = new Vector3(w, h, Random.Range(0, SIZE));
+                        for (int j = 0; j < 5; j++)
+                        {
+                            GameObject cube = Instantiate(Resources.Load("Cubexy", typeof(GameObject))) as GameObject;
+                            cube.transform.parent = transform;
+                            cube.transform.position = new Vector3(w, h, Random.Range(0, SIZE));
+                            count++;
+                        }
                     }
                 }
 
@@ -84,9 +127,13 @@ public class Mymodel : MonoBehaviour
                     }
                     if (!c1)
                     {
-                        GameObject cube = Instantiate(Resources.Load("Cubeyz", typeof(GameObject))) as GameObject;
-                        cube.transform.parent = transform;
-                        cube.transform.position = new Vector3(Random.Range(0, SIZE), h, w);
+                        for (int j = 0; j < 5; j++)
+                        {
+                            GameObject cube = Instantiate(Resources.Load("Cubeyz", typeof(GameObject))) as GameObject;
+                            cube.transform.parent = transform;
+                            cube.transform.position = new Vector3(Random.Range(0, SIZE), h, w);
+                            count++;
+                        }
                     }
                 }
 
@@ -99,20 +146,21 @@ public class Mymodel : MonoBehaviour
                     }
                     if (!c2)
                     {
-                        GameObject cube = Instantiate(Resources.Load("Cubezx", typeof(GameObject))) as GameObject;
-                        cube.transform.parent = transform;
-                        cube.transform.position = new Vector3(SIZE - 1 - h, Random.Range(0, SIZE), w);
+                        for (int j = 0; j < 5; j++)
+                        {
+                            GameObject cube = Instantiate(Resources.Load("Cubezx", typeof(GameObject))) as GameObject;
+                            cube.transform.parent = transform;
+                            cube.transform.position = new Vector3(SIZE - 1 - h, Random.Range(0, SIZE), w);
+                            count++;
+                        }
                     }
                 }
             }
         }
-    }
 
-
-
-    private void Update()
-    {
-
+        Vector3 rotate = new Vector3(Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f)).normalized;
+        float alpha = Random.Range(0, 360.0f);
+        transform.RotateAround(new Vector3((SIZE - 1) / 2.0f, (SIZE - 1) / 2.0f, (SIZE - 1) / 2.0f), rotate, alpha);
     }
 
     private void SavePNG(Texture2D img)

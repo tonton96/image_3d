@@ -56,6 +56,56 @@ public class Mymodel : MonoBehaviour
                 }
             }
         }
+        for (int h = 0; h < SIZE; h++)
+        {
+            for (int w = 0; w < SIZE; w++)
+            {
+                if (mapxy[h, w])
+                {
+                    bool c0 = false;
+                    for (int i = 0; i < SIZE; i++)
+                    {
+                        c0 = c0 || map[w, h, i];
+                    }
+                    if (!c0)
+                    {
+                        GameObject cube = Instantiate(Resources.Load("Cubexy", typeof(GameObject))) as GameObject;
+                        cube.transform.parent = transform;
+                        cube.transform.position = new Vector3(w, h, Random.Range(0, SIZE));
+                    }
+                }
+
+                if (mapyz[h, w])
+                {
+                    bool c1 = false;
+                    for (int i = 0; i < SIZE; i++)
+                    {
+                        c1 = c1 || map[i, h, w];
+                    }
+                    if (!c1)
+                    {
+                        GameObject cube = Instantiate(Resources.Load("Cubeyz", typeof(GameObject))) as GameObject;
+                        cube.transform.parent = transform;
+                        cube.transform.position = new Vector3(Random.Range(0, SIZE), h, w);
+                    }
+                }
+
+                if (mapzx[h, w])
+                {
+                    bool c2 = false;
+                    for (int i = 0; i < SIZE; i++)
+                    {
+                        c2 = c2 || map[SIZE - h - 1, i, w];
+                    }
+                    if (!c2)
+                    {
+                        GameObject cube = Instantiate(Resources.Load("Cubezx", typeof(GameObject))) as GameObject;
+                        cube.transform.parent = transform;
+                        cube.transform.position = new Vector3(SIZE - 1 - h, Random.Range(0, SIZE), w);
+                    }
+                }
+            }
+        }
     }
 
 
